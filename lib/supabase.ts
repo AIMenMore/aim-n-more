@@ -8,7 +8,7 @@ const USE_LOCAL_MOCK = true;
 // -------------------------------------------------------------
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const realSupabase = typeof window !== "undefined"
+const realSupabase = !USE_LOCAL_MOCK && typeof window !== "undefined" && supabaseUrl && supabaseUrl.startsWith("http")
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         storageKey: 'sb-auth-token',
