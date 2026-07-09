@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Protect all /admin routes
   if (path.startsWith('/admin')) {
     const tokenCookie = request.cookies.get('sb-auth-token');
-    
+
     let isAuthenticated = false;
     if (tokenCookie?.value) {
       try {

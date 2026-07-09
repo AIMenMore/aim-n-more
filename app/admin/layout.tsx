@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import styles from "./layout.module.css";
 
@@ -17,7 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       if (!session) {
         router.replace("/login");
       } else {
