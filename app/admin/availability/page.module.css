@@ -1,0 +1,142 @@
+.page {
+  max-width: 760px;
+  position: relative;
+}
+
+.header {
+  margin-bottom: 36px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--cream-muted);
+  margin-top: 4px;
+}
+
+/* ── Sections ─────────────────────────────────────────────── */
+.section {
+  margin-bottom: 52px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--cream);
+  font-weight: 500;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(201,162,39,0.15);
+}
+
+.sectionSub {
+  font-size: 13px;
+  color: var(--cream-dim);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+/* ── Hour rows ────────────────────────────────────────────── */
+.hoursList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hourRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  flex-wrap: wrap;
+}
+
+.dayName {
+  font-size: 14px;
+  color: var(--cream);
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.closedToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--cream-dim);
+  cursor: pointer;
+}
+
+.timeInput {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeInput label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cream-muted);
+}
+
+.timeInput input[type="time"] {
+  background: var(--black-light);
+  border: 1px solid rgba(245,241,232,0.1);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  color: var(--cream);
+  font-size: 13px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.timeInput input[type="time"]:focus {
+  border-color: var(--gold);
+}
+
+/* ── Blocked dates ────────────────────────────────────────── */
+.addBlockRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.blockedList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blockedItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-color: rgba(217,79,79,0.15);
+}
+
+.blockedItem:hover {
+  border-color: rgba(217,79,79,0.3);
+}
+
+.blockedDate {
+  font-size: 14px;
+  color: var(--cream);
+}
+
+.noBlocked {
+  font-size: 14px;
+  color: var(--cream-muted);
+  font-style: italic;
+  padding: 20px 0;
+}
