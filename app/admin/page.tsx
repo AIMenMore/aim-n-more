@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { supabase, type Appointment, type ServiceStatus } from "@/lib/supabase";
+import { SALON_TZ, salonToISO, salonDateOf, salonToday } from "@/lib/time";
 import styles from "./page.module.css";
 
 const STATUS_OPTIONS: ServiceStatus[] = ["pending", "confirmed", "done", "cancelled"];
@@ -55,14 +56,14 @@ function groupAppointments(appointments: Appointment[]): BookingGroup[] {
 function formatDateTime(iso: string) {
   const d = new Date(iso);
   return {
-    date: d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" }),
-    time: d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
-    full: d.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }),
+    date: d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: SALON_TZ }),
+    time: d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: SALON_TZ }),
+    full: d.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric", timeZone: SALON_TZ }),
   };
 }
 
 function isToday(iso: string) {
-  return new Date(iso).toDateString() === new Date().toDateString();
+  return salonDateOf(iso) === salonToday();
 }
 
 function toWaLink(phone: string) {
@@ -137,7 +138,7 @@ export default function AdminDashboard() {
 
   const handleReschedule = async (group: BookingGroup) => {
     if (!rescheduleDate || !rescheduleTime) return;
-    const dt = new Date(`${rescheduleDate}T${rescheduleTime}:00`).toISOString();
+    const dt = salonToISO(rescheduleDate, rescheduleTime);
     for (const apt of group.appointments) {
       await supabase.from("appointments").update({ date_time: dt, status: "confirmed" }).eq("id", apt.id);
     }

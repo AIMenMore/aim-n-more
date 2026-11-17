@@ -2,40 +2,32 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase, type Service, type Availability } from "@/lib/supabase";
+import { salonToday, addDays, salonToISO, freeSlots, type BusyBlock } from "@/lib/time";
 import styles from "./page.module.css";
 
 const STEPS = ["Service", "Date & Time", "Your Info", "Confirm"];
+const DAYS_AHEAD = 14;
 
-function generateTimeSlots(open: string, close: string, durationMins: number): string[] {
-  const slots: string[] = [];
-  const [oh, om] = open.split(":").map(Number);
-  const [ch, cm] = close.split(":").map(Number);
-  let current = oh * 60 + om;
-  const end = ch * 60 + cm;
-  while (current + durationMins <= end) {
-    const h = Math.floor(current / 60).toString().padStart(2, "0");
-    const m = (current % 60).toString().padStart(2, "0");
-    slots.push(`${h}:${m}`);
-    current += durationMins;
-  }
-  return slots;
-}
-
-function getNext14Days(): { date: Date; label: string; value: string }[] {
+// Dates are based on Suriname's calendar, so the label and the booked day always match.
+function getBookableDays(): { date: Date; label: string; value: string }[] {
+  const today = salonToday();
   const days = [];
-  const today = new Date();
-  for (let i = 1; i <= 14; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
-    const label = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    days.push({
-      date: d,
-      label: `${dayName} ${label}`,
-      value: d.toISOString().split("T")[0],
-    });
+  for (let i = 1; i <= DAYS_AHEAD; i++) {
+    const value = addDays(today, i);
+    // Local noon on that calendar date: getDay() is correct in any time zone
+    const date = new Date(`${value}T12:00:00`);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+    const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    days.push({ date, label: `${dayName} ${label}`, value });
   }
   return days;
+}
+
+// Busy time blocks on a day (no personal data, just start + length)
+async function fetchBusy(day: string): Promise<BusyBlock[]> {
+  const { data, error } = await supabase.rpc("get_booked_slots", { day });
+  if (error) throw error;
+  return (data ?? []) as BusyBlock[];
 }
 
 function BookingForm() {
@@ -52,13 +44,14 @@ function BookingForm() {
   // Availability stored fresh on step 1 entry
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [loadingAvail, setLoadingAvail] = useState(false);
+  const [busy, setBusy] = useState<BusyBlock[]>([]);
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [clientNote, setClientNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const days = getNext14Days();
+  const days = getBookableDays();
 
   // ── Fetch services once on mount ─────────────────────────────────
   useEffect(() => {
@@ -105,51 +98,41 @@ function BookingForm() {
     .filter((a) => a.specific_date !== null && a.is_closed)
     .map((a) => a.specific_date as string);
 
-  // Max duration across selected services (for time slot generation)
-  const maxDuration = selectedServices.reduce(
-    (max, s) => Math.max(max, s.duration_minutes),
-    60
+  // Services are done one after another, so the appointment needs the TOTAL time
+  const totalDuration = Math.max(
+    15,
+    selectedServices.reduce((sum, s) => sum + (s.duration_minutes || 0), 0)
   );
 
-  // ── Fetch time slots when date or services change ─────────────────
+  // Opening hours for a date (specific override wins over the weekly schedule)
+  const hoursFor = (day: string): { open: string; close: string } | null => {
+    const specific = availability.find((a) => a.specific_date === day);
+    if (specific) return specific.is_closed ? null : { open: specific.open_time, close: specific.close_time };
+    const dow = new Date(`${day}T12:00:00`).getDay();
+    const weekly = availability.find((a) => a.day_of_week === dow);
+    if (!weekly || weekly.is_closed) return null;
+    return { open: weekly.open_time, close: weekly.close_time };
+  };
+
+  // ── Load booked times whenever the date changes ───────────────────
+  useEffect(() => {
+    if (!selectedDate) return;
+    let cancelled = false;
+    setBusy([]);
+    fetchBusy(selectedDate)
+      .then((b) => { if (!cancelled) setBusy(b); })
+      .catch(() => { if (!cancelled) setError("Could not load the agenda. Please refresh the page."); });
+    return () => { cancelled = true; };
+  }, [selectedDate]);
+
+  // ── Free time slots: opening hours minus already-booked times ─────
   useEffect(() => {
     if (!selectedDate || selectedServices.length === 0) return;
-    const fetchSlots = async () => {
-      // Check for a specific date override first
-      const specificOverride = availability.find(
-        (a) => a.specific_date === selectedDate
-      );
-
-      if (specificOverride) {
-        if (specificOverride.is_closed) {
-          setAvailableSlots([]);
-        } else {
-          const slots = generateTimeSlots(
-            specificOverride.open_time,
-            specificOverride.close_time,
-            maxDuration
-          );
-          setAvailableSlots(slots);
-        }
-        return;
-      }
-
-      // Use the weekly schedule
-      const date = new Date(selectedDate + "T12:00:00");
-      const dow = date.getDay();
-      const weeklyRow = availability.find(
-        (a) => a.day_of_week === dow
-      );
-      if (!weeklyRow || weeklyRow.is_closed) {
-        setAvailableSlots([]);
-      } else {
-        const slots = generateTimeSlots(weeklyRow.open_time, weeklyRow.close_time, maxDuration);
-        setAvailableSlots(slots);
-      }
-    };
-    fetchSlots();
+    const hours = hoursFor(selectedDate);
+    setAvailableSlots(hours ? freeSlots(hours.open, hours.close, totalDuration, busy) : []);
     setSelectedTime("");
-  }, [selectedDate, selectedServices, availability]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDate, selectedServices, availability, busy]);
 
   // ── Toggle service selection ──────────────────────────────────────
   const toggleService = (s: Service) => {
@@ -168,9 +151,30 @@ function BookingForm() {
     }
     setLoading(true);
     setError("");
-    const dateTime = new Date(`${selectedDate}T${selectedTime}:00`).toISOString();
 
-    // Insert one row per service
+    // Check again right before saving: someone else may have just booked this time
+    try {
+      const latestBusy = await fetchBusy(selectedDate);
+      const hours = hoursFor(selectedDate);
+      const stillFree = hours
+        ? freeSlots(hours.open, hours.close, totalDuration, latestBusy).includes(selectedTime)
+        : false;
+      if (!stillFree) {
+        setBusy(latestBusy);
+        setLoading(false);
+        setError("Sorry, this time was just booked by someone else. Please choose another time.");
+        setStep(1);
+        return;
+      }
+    } catch {
+      setLoading(false);
+      setError("Something went wrong. Please try again.");
+      return;
+    }
+
+    const dateTime = salonToISO(selectedDate, selectedTime);
+
+    // Insert one row per service (same start time = one booking in the admin)
     const rows = selectedServices.map((svc) => ({
       client_name: clientName.trim(),
       client_phone: clientPhone.trim(),
@@ -189,6 +193,7 @@ function BookingForm() {
       router.push("/book/success");
     }
   };
+
 
   const categories = [...new Set(services.map((s) => s.category))];
   const totalPrice = selectedServices.reduce(

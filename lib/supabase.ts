@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { salonDateOf } from "./time";
 
 // Set to true to use LocalStorage/mock database, or false to use a live Supabase project
 const USE_LOCAL_MOCK = true;
@@ -145,8 +146,7 @@ const getSession = () => getLocal<any>("aim_n_more_session", null);
 class MockQueryBuilder {
   private table: string;
   private filters: ((item: any) => boolean)[] = [];
-  private sortCol: string | null = null;
-  private sortAsc: boolean = true;
+  private sorts: { col: string; asc: boolean }[] = [];
   private operation: { type: "select" | "insert" | "update" | "delete"; payload?: any } = { type: "select" };
 
   constructor(table: string) {
@@ -171,8 +171,7 @@ class MockQueryBuilder {
   }
 
   order(column: string, options?: { ascending?: boolean }) {
-    this.sortCol = column;
-    this.sortAsc = options?.ascending !== false;
+    this.sorts.push({ col: column, asc: options?.ascending !== false });
     return this;
   }
 
@@ -257,12 +256,12 @@ class MockQueryBuilder {
       return result;
     }
 
-    if (this.sortCol) {
+    if (this.sorts.length) {
       result.sort((a, b) => {
-        const valA = a[this.sortCol!];
-        const valB = b[this.sortCol!];
-        if (valA < valB) return this.sortAsc ? -1 : 1;
-        if (valA > valB) return this.sortAsc ? 1 : -1;
+        for (const { col, asc } of this.sorts) {
+          if (a[col] < b[col]) return asc ? -1 : 1;
+          if (a[col] > b[col]) return asc ? 1 : -1;
+        }
         return 0;
       });
     }
@@ -310,6 +309,22 @@ const mockSupabase = {
   },
   from(table: string) {
     return new MockQueryBuilder(table);
+  },
+  // Mirrors the get_booked_slots() SQL function: busy blocks on one Suriname day
+  async rpc(fn: string, args: any) {
+    if (fn !== "get_booked_slots") return { data: null, error: { message: `Unknown function ${fn}` } };
+    const svcs = getServices();
+    const groups = new Map<string, { start_time: string; duration_minutes: number }>();
+    for (const a of getAppointments()) {
+      if (a.status === "cancelled") continue;
+      if (salonDateOf(a.date_time) !== args.day) continue;
+      const key = `${a.client_phone}__${a.date_time}`;
+      const dur = svcs.find((s) => s.id === a.service_id)?.duration_minutes ?? 60;
+      const g = groups.get(key);
+      if (g) g.duration_minutes += dur;
+      else groups.set(key, { start_time: a.date_time, duration_minutes: dur });
+    }
+    return { data: [...groups.values()], error: null };
   },
   storage: {
     from(bucket: string) {

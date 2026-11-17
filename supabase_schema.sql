@@ -137,3 +137,26 @@ CREATE POLICY "Admin Upload Access" ON storage.objects
 CREATE POLICY "Admin Update Delete Access" ON storage.objects
   FOR ALL TO authenticated USING (bucket_id = 'service-images') WITH CHECK (bucket_id = 'service-images');
 
+
+-- ─── Booked time slots (for the public booking page) ──────────────
+-- Visitors may not read appointments (privacy), so this function only
+-- returns busy blocks: start time + total length, no names or phones.
+-- Services in one booking share a start time and run back to back.
+CREATE OR REPLACE FUNCTION get_booked_slots(day DATE)
+RETURNS TABLE (start_time TIMESTAMPTZ, duration_minutes INTEGER)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT a.date_time AS start_time,
+         SUM(s.duration_minutes)::INTEGER AS duration_minutes
+  FROM appointments a
+  JOIN services s ON s.id = a.service_id
+  WHERE a.status <> 'cancelled'
+    AND (a.date_time AT TIME ZONE 'America/Paramaribo')::DATE = day
+  GROUP BY a.client_phone, a.date_time;
+$$;
+
+REVOKE ALL ON FUNCTION get_booked_slots(DATE) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION get_booked_slots(DATE) TO anon, authenticated;
