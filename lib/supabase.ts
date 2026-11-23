@@ -7,8 +7,15 @@ const USE_LOCAL_MOCK = false;
 // -------------------------------------------------------------
 // Real Supabase Client Configuration
 // -------------------------------------------------------------
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
+// Shea's Supabase project. Both values are PUBLIC by design (they ship to every visitor's
+// browser); the data is protected by the row level security rules in supabase_schema.sql.
+// Environment variables in Vercel can override them.
+const SHEA_SUPABASE_URL = "https://orclemcqvazfawlagpyi.supabase.co";
+const SHEA_PUBLISHABLE_KEY = "sb_publishable_ohVkEqHE3u6X0kYDdbcwAg_cToDaMEI";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || SHEA_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.startsWith("sb_publishable_")
+  ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  : SHEA_PUBLISHABLE_KEY;
 const realSupabase = !USE_LOCAL_MOCK && supabaseUrl && supabaseUrl.startsWith("http")
   ? createClient(supabaseUrl, supabaseAnonKey, {
       // Standard Supabase session storage (browser localStorage).
