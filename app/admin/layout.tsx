@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               id={`admin-nav-${label.toLowerCase()}`}
             >
               <span className={styles.navIcon}>{icon}</span>
-              {label}
+              <span className={styles.navLabel}>{label}</span>
             </Link>
           ))}
         </nav>

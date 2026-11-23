@@ -161,7 +161,7 @@
 }
 
 .activateBtn {
-  color: #48c78e !important;
+  color: #23784f !important;
   border-color: rgba(72,199,142,0.3) !important;
 }
 
@@ -332,3 +332,30 @@
   color: var(--gold-light);
 }
 
+
+/* ── Phones: name/price on top, buttons on their own row ── */
+@media (max-width: 640px) {
+  .serviceCard {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .serviceInfo {
+    flex: 1 1 60%;
+    min-width: 0;
+  }
+
+  .priceBlock {
+    min-width: 0;
+  }
+
+  .serviceActions {
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+  }
+
+  .header {
+    flex-wrap: wrap;
+  }
+}

@@ -363,7 +363,7 @@ export default function AdminDashboard() {
                       className={`${styles.row} ${todayFlag ? styles.rowToday : ""}`}
                     >
                       {/* Date & Time */}
-                      <td>
+                      <td data-label="Date & Time">
                         <span className={styles.date}>{date}</span>
                         <span className={styles.time}>{time}</span>
                         {todayFlag && (
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
                       </td>
 
                       {/* Client */}
-                      <td>
+                      <td data-label="Client">
                         <span className={styles.clientName}>{group.client_name}</span>
                         <a
                           href={toWaLink(group.client_phone)}
@@ -393,7 +393,7 @@ export default function AdminDashboard() {
                       </td>
 
                       {/* Services — compact pill list */}
-                      <td>
+                      <td data-label="Services">
                         <div className={styles.servicePills}>
                           {group.appointments.map((apt) => (
                             <span key={apt.id} className={styles.servicePill}>
@@ -404,21 +404,21 @@ export default function AdminDashboard() {
                       </td>
 
                       {/* Total price */}
-                      <td>
+                      <td data-label="Total">
                         <span className={styles.groupTotal}>
                           SRD {groupTotal(group).toLocaleString()}
                         </span>
                       </td>
 
                       {/* Status badge — aggregate */}
-                      <td>
+                      <td data-label="Status">
                         <span className={`badge badge--${group.status === "mixed" ? "pending" : group.status} ${styles.statusBadge}`}>
                           {group.status}
                         </span>
                       </td>
 
                       {/* Actions */}
-                      <td>
+                      <td data-label="Actions">
                         <div className={styles.actions}>
                           <button
                             className="btn btn-ghost btn-sm"

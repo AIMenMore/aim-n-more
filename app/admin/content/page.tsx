@@ -138,7 +138,7 @@ export default function ContentAdminPage() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={values[f.key]} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       ) : (
-                        <span style={{ fontSize: 12, opacity: 0.6 }}>no photo</span>
+                        <span style={{ fontSize: 12, color: "var(--text-soft)" }}>no photo</span>
                       )}
                     </div>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
