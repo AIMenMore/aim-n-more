@@ -1,6 +1,7 @@
 import { supabase, type Service } from "@/lib/supabase";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { BUSINESS } from "@/lib/business";
 
 const CATEGORY_ORDER = ["Facials", "Mani / Pedi", "Waxing", "PMU"];
 
@@ -35,8 +36,8 @@ export default async function ServicesPage() {
           <div className="divider" style={{ marginTop: "20px" }} />
           <p className={styles.sub}>
             All prices in Surinamese dollars (SRD). Book online or call{" "}
-            <a href="tel:+5977173636" className={styles.phone}>
-              +597 717 3636
+            <a href={`tel:${BUSINESS.phone.tel}`} className={styles.phone}>
+              {BUSINESS.phone.display}
             </a>
             .
           </p>

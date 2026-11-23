@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./Footer.module.css";
+import { BUSINESS } from "@/lib/business";
 
 export default function Footer() {
   return (
@@ -16,22 +17,22 @@ export default function Footer() {
         <div className={styles.columns}>
           <div className={styles.col}>
             <p className={styles.colTitle}>Hours</p>
-            <p>Tue – Sat</p>
-            <p>10:00 – 19:00</p>
+            <p>{BUSINESS.hours.days}</p>
+            <p>{BUSINESS.hours.time}</p>
             <p style={{ color: "var(--cream-muted)", fontSize: "13px", marginTop: "4px" }}>
-              Sun & Mon closed
+              {BUSINESS.hours.closed}
             </p>
           </div>
 
           <div className={styles.col}>
             <p className={styles.colTitle}>Contact</p>
-            <a href="tel:+5977173636" className={styles.colLink}>
-              +597 717 3636
+            <a href={`tel:${BUSINESS.phone.tel}`} className={styles.colLink}>
+              {BUSINESS.phone.display}
             </a>
-            <a href="https://wa.me/5977173636" className={styles.colLink} target="_blank" rel="noopener noreferrer">
+            <a href={BUSINESS.phone.whatsapp} className={styles.colLink} target="_blank" rel="noopener noreferrer">
               WhatsApp
             </a>
-            <a href="mailto:yourstruly.luxx@gmail.com" className={styles.colLink}>
+            <a href={`mailto:${BUSINESS.email}`} className={styles.colLink}>
               Email us
             </a>
           </div>
@@ -39,20 +40,28 @@ export default function Footer() {
           <div className={styles.col}>
             <p className={styles.colTitle}>Follow</p>
             <a
-              href="https://instagram.com/aimnmore"
+              href={BUSINESS.socials.instagram.url}
               className={styles.colLink}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Instagram @aimnmore
+              Instagram {BUSINESS.socials.instagram.label}
             </a>
             <a
-              href="https://facebook.com"
+              href={BUSINESS.socials.tiktok.url}
               className={styles.colLink}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Facebook — AIM &amp;more
+              TikTok {BUSINESS.socials.tiktok.label}
+            </a>
+            <a
+              href={BUSINESS.socials.facebook.url}
+              className={styles.colLink}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Facebook — {BUSINESS.socials.facebook.label}
             </a>
           </div>
         </div>

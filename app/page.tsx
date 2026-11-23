@@ -1,6 +1,7 @@
 import Link from "next/link";
 import styles from "./page.module.css";
 import ZoomOnView from "@/components/ZoomOnView";
+import { BUSINESS } from "@/lib/business";
 
 const FEATURED_SERVICES = [
   { name: "Ombre Powder Brows", category: "PMU", price: 2500, tag: "Incl. touch-up", image_url: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?w=400&q=80" },
@@ -78,9 +79,9 @@ export default function HomePage() {
         <div className="container">
           <div className={styles.introGrid}>
             {[
-              { label: "Tue – Sat", sub: "Open for appointments" },
-              { label: "10:00 – 19:00", sub: "Working hours" },
-              { label: "+597 717 3636", sub: "Call or WhatsApp" },
+              { label: BUSINESS.hours.days, sub: "Open for appointments" },
+              { label: BUSINESS.hours.time, sub: "Working hours" },
+              { label: BUSINESS.phone.display, sub: "Call or WhatsApp" },
             ].map((item) => (
               <div key={item.label} className={styles.introItem}>
                 <span className={styles.introLabel}>{item.label}</span>
@@ -246,6 +247,13 @@ export default function HomePage() {
       {/* ── Contact info ──────────────────────────────────────── */}
       <section className={`section-sm ${styles.contact}`}>
         <div className="container">
+          <div className={styles.policyBox}>
+            <p className={styles.contactTitle}>Good to know</p>
+            <ul className={styles.policyList}>
+              {BUSINESS.policies.map((p) => <li key={p}>{p}</li>)}
+              <li>Payment: {BUSINESS.payment.methods}.</li>
+            </ul>
+          </div>
           <p className={styles.sectionLabel} style={{ textAlign: "center", marginBottom: "40px" }}>
             Find Us
           </p>
@@ -254,8 +262,11 @@ export default function HomePage() {
               <span className={styles.contactIcon}>📍</span>
               <div>
                 <p className={styles.contactTitle}>Location</p>
-                <p className={styles.contactText}>
-                  4e Dwarsweg, Houttuin<br />Wanica, Suriname
+                <a href={BUSINESS.address.mapsUrl} target="_blank" rel="noopener noreferrer" className={styles.contactText}>
+                  {BUSINESS.address.line1}<br />{BUSINESS.address.line2}<br />{BUSINESS.address.city}
+                </a>
+                <p className={styles.contactText} style={{ fontStyle: "italic", marginTop: "6px" }}>
+                  {BUSINESS.homeServiceNote}
                 </p>
               </div>
             </div>
@@ -263,20 +274,21 @@ export default function HomePage() {
               <span className={styles.contactIcon}>📞</span>
               <div>
                 <p className={styles.contactTitle}>Phone / WhatsApp</p>
-                <a href="tel:+5977173636" className={styles.contactLink}>+597 717 3636</a>
+                <a href={`tel:${BUSINESS.phone.tel}`} className={styles.contactLink}>{BUSINESS.phone.display}</a>
               </div>
             </div>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>📷</span>
               <div>
-                <p className={styles.contactTitle}>Instagram</p>
-                <a
-                  href="https://instagram.com/aimnmore"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={styles.contactLink}
-                >
-                  @aimnmore
+                <p className={styles.contactTitle}>Socials</p>
+                <a href={BUSINESS.socials.instagram.url} target="_blank" rel="noopener noreferrer" className={styles.contactLink}>
+                  Instagram {BUSINESS.socials.instagram.label}
+                </a><br />
+                <a href={BUSINESS.socials.tiktok.url} target="_blank" rel="noopener noreferrer" className={styles.contactLink}>
+                  TikTok {BUSINESS.socials.tiktok.label}
+                </a><br />
+                <a href={BUSINESS.socials.facebook.url} target="_blank" rel="noopener noreferrer" className={styles.contactLink}>
+                  Facebook {BUSINESS.socials.facebook.label}
                 </a>
               </div>
             </div>

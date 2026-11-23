@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase, type Service, type Availability } from "@/lib/supabase";
 import { salonToday, addDays, salonToISO, freeSlots, type BusyBlock } from "@/lib/time";
+import { BUSINESS } from "@/lib/business";
 import styles from "./page.module.css";
 
 const STEPS = ["Service", "Date & Time", "Your Info", "Confirm"];
@@ -498,7 +499,8 @@ function BookingForm() {
               </div>
             </div>
             <p className={styles.paymentNote}>
-              💳 Payment is cash or bank wire upon arrival.
+              💳 Payment: {BUSINESS.payment.methods}.<br />
+              ⏰ {BUSINESS.policies.join(" ")}
             </p>
             <div className={styles.navRow}>
               <button className="btn btn-ghost" onClick={() => setStep(2)}>← Back</button>

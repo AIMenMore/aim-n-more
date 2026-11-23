@@ -85,7 +85,7 @@ const DEFAULT_SERVICES: Service[] = [
 
 const DEFAULT_AVAILABILITY: Availability[] = [
   { id: "a0", day_of_week: 0, specific_date: null, open_time: "10:00", close_time: "19:00", is_closed: true },
-  { id: "a1", day_of_week: 1, specific_date: null, open_time: "10:00", close_time: "19:00", is_closed: true },
+  { id: "a1", day_of_week: 1, specific_date: null, open_time: "10:00", close_time: "19:00", is_closed: false },
   { id: "a2", day_of_week: 2, specific_date: null, open_time: "10:00", close_time: "19:00", is_closed: false },
   { id: "a3", day_of_week: 3, specific_date: null, open_time: "10:00", close_time: "19:00", is_closed: false },
   { id: "a4", day_of_week: 4, specific_date: null, open_time: "10:00", close_time: "19:00", is_closed: false },
@@ -262,7 +262,8 @@ const mockSupabase = {
       return { data: { session }, error: null };
     },
     async signInWithPassword({ email, password }: any) {
-      if (email === "admin@aimnmore.com" && password === "admin123") {
+      // Local test mode only: any email/password works on this computer, never on the live site
+      if (typeof window !== "undefined" && window.location.hostname === "localhost" && email && password) {
         const mockSession = {
           user: { id: "admin-user", email },
           access_token: "mock-token",

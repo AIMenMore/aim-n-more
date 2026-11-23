@@ -91,11 +91,11 @@ CREATE POLICY "Public can read availability"
 CREATE POLICY "Admin can manage availability"
   ON availability FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
--- ─── Seed: default working hours (Tue–Sat 10:00–19:00) ───────────
+-- ─── Seed: default working hours (Mon–Sat 10:00–19:00) ───────────
 INSERT INTO availability (day_of_week, open_time, close_time, is_closed)
 VALUES
   (0, '10:00', '19:00', true),   -- Sunday:   closed
-  (1, '10:00', '19:00', true),   -- Monday:   closed
+  (1, '10:00', '19:00', false),  -- Monday:   open
   (2, '10:00', '19:00', false),  -- Tuesday:  open
   (3, '10:00', '19:00', false),  -- Wednesday:open
   (4, '10:00', '19:00', false),  -- Thursday: open
