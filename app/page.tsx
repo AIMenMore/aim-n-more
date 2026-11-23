@@ -11,6 +11,7 @@ const FEATURED_SERVICES = [
 ];
 
 const GALLERY = [
+  { src: "/images/before-after-hair.jpg", alt: "Hair treatment before and after at Aim N More" },
   { src: "https://images.unsplash.com/photo-1583001931096-959e9a1a6223?w=500&q=80", alt: "Ombre powder brow result close-up" },
   { src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80", alt: "Fresh manicure detail" },
   { src: "https://images.unsplash.com/photo-1588514727390-91fd5ebaef81?w=500&q=80", alt: "Lipblush PMU result" },
@@ -121,8 +122,8 @@ export default function HomePage() {
           <div className={styles.aboutImageWrap}>
             <div className={styles.aboutImage}>
               <img
-                src="https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=700&q=80"
-                alt="Inside the Aim N More studio"
+                src="/images/shea.jpg"
+                alt="Shea in the Aim N More studio"
                 className={styles.aboutImg}
               />
             </div>

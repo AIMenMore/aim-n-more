@@ -96,3 +96,9 @@
     display: none;
   }
 }
+
+.logoImg {
+  height: 64px;
+  width: auto;
+  display: block;
+}
