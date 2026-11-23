@@ -128,6 +128,7 @@ const setLocal = <T>(key: string, value: T) => {
 const getServices = () => getLocal<Service[]>("aim_n_more_services", DEFAULT_SERVICES);
 const getAvailability = () => getLocal<Availability[]>("aim_n_more_availability", DEFAULT_AVAILABILITY);
 const getAppointments = () => getLocal<Appointment[]>("aim_n_more_appointments", []);
+const getSiteContentRows = () => getLocal<any[]>("aim_n_more_site_content", []);
 const getSession = () => getLocal<any>("aim_n_more_session", null);
 
 // -------------------------------------------------------------
@@ -180,6 +181,19 @@ class MockQueryBuilder {
     return this;
   }
 
+  // Only used for site_content (key/value rows)
+  upsert(payload: any) {
+    const items = Array.isArray(payload) ? payload : [payload];
+    const rows = getSiteContentRows();
+    for (const it of items) {
+      const i = rows.findIndex((r: any) => r.key === it.key);
+      if (i >= 0) rows[i] = { ...rows[i], ...it };
+      else rows.push(it);
+    }
+    setLocal("aim_n_more_site_content", rows);
+    return Promise.resolve({ data: items, error: null });
+  }
+
   async single() {
     const res = await this.execute();
     return { data: res[0] || null, error: res[0] ? null : { message: "Not found" } };
@@ -204,6 +218,7 @@ class MockQueryBuilder {
     let data: any[] = [];
     if (this.table === "services") data = getServices();
     else if (this.table === "availability") data = getAvailability();
+    else if (this.table === "site_content") data = getSiteContentRows();
     else if (this.table === "appointments") {
       const appts = getAppointments();
       const svcs = getServices();

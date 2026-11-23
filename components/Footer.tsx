@@ -69,6 +69,14 @@ export default function Footer() {
 
       <div className={styles.bottom}>
         <p>© {new Date().getFullYear()} Aim &amp; More. All rights reserved.</p>
+        <a
+          href="https://wa.me/5978902214"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.madeBy}
+        >
+          Made by GVG · +597 890 2214
+        </a>
         <Link href="/login" className={styles.adminLink}>
           Admin
         </Link>

@@ -2,31 +2,29 @@ import Link from "next/link";
 import styles from "./page.module.css";
 import ZoomOnView from "@/components/ZoomOnView";
 import { BUSINESS } from "@/lib/business";
+import { getSiteContent } from "@/lib/content";
 
-const FEATURED_SERVICES = [
-  { name: "Ombre Powder Brows", category: "PMU", price: 2500, tag: "Incl. touch-up", image_url: "https://images.unsplash.com/photo-1519014816548-bf5fe059e98b?w=400&q=80" },
-  { name: "Russian Pedicure", category: "Mani / Pedi", price: 550, tag: null, image_url: "https://images.unsplash.com/photo-1522337660859-02fbefca4702?w=400&q=80" },
-  { name: "Brazilian Wax", category: "Waxing", price: 550, tag: null, image_url: null },
-  { name: "Dermaplaning", category: "Facials", price: 975, tag: null, image_url: "https://images.unsplash.com/photo-1570172619644-def2d4e680a6?w=400&q=80" },
-];
+// Shea edits texts and photos in Admin → Website; refresh at most every 30 seconds
+export const revalidate = 30;
 
-const GALLERY = [
-  { src: "/images/before-after-hair.jpg", alt: "Hair treatment before and after at Aim & More" },
-  { src: "https://images.unsplash.com/photo-1583001931096-959e9a1a6223?w=500&q=80", alt: "Ombre powder brow result close-up" },
-  { src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80", alt: "Fresh manicure detail" },
-  { src: "https://images.unsplash.com/photo-1588514727390-91fd5ebaef81?w=500&q=80", alt: "Lipblush PMU result" },
-  { src: "https://images.unsplash.com/photo-1519415510236-718bdfcd89c1?w=500&q=80", alt: "Pedicure finishing touch" },
-  { src: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=500&q=80", alt: "Brow shaping in progress" },
-  { src: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&q=80", alt: "Studio treatment moment" },
-];
+export default async function HomePage() {
+  const c = await getSiteContent();
+  const featured = [1, 2, 3, 4]
+    .map((n) => ({
+      name: c[`feat${n}_name`],
+      category: c[`feat${n}_category`],
+      price: c[`feat${n}_price`],
+      tag: c[`feat${n}_tag`],
+      image_url: c[`feat${n}_image`],
+    }))
+    .filter((f) => f.name);
+  const gallery = [1, 2, 3, 4, 5, 6, 7]
+    .map((n) => c[`gallery_${n}`])
+    .filter(Boolean);
+  const reviews = [1, 2, 3]
+    .map((n) => ({ quote: c[`review${n}_quote`], name: c[`review${n}_name`], service: c[`review${n}_service`] }))
+    .filter((r) => r.quote);
 
-const TESTIMONIALS = [
-  { quote: "My brows have never looked this precise. Shea took her time and it shows — three years later and people still ask where I get them done.", name: "Naomi R.", service: "Ombre Powder Brows" },
-  { quote: "I walked in nervous about the Brazilian and walked out telling every friend I have. Clean space, no rushing, exactly on time.", name: "Denise K.", service: "Waxing" },
-  { quote: "Booked online in a minute, got a reminder, showed up — no back and forth on WhatsApp needed. The pedicure itself was excellent too.", name: "Priscilla A.", service: "Russian Pedicure" },
-];
-
-export default function HomePage() {
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────────── */}
@@ -34,16 +32,16 @@ export default function HomePage() {
         <div className={styles.heroBg} aria-hidden="true" />
         <div className={`container ${styles.heroGrid}`}>
           <div className={styles.heroContent}>
-            <p className={styles.heroEyebrow}>Aim &amp; More Studio · Suriname</p>
+            <p className={styles.heroEyebrow}>{c.hero_eyebrow}</p>
             <h1 className={styles.heroTitle}>
-              Because you deserve
+              {c.hero_title_1}
               <br />
-              <em>good brows &amp; sexy lips,</em>
+              <em>{c.hero_title_highlight}</em>
               <br />
-              every day.
+              {c.hero_title_2}
             </h1>
             <p className={styles.heroSub}>
-              Premium nails · pedicures · waxing · permanent make-up
+              {c.hero_sub}
             </p>
             <div className={styles.heroCta}>
               <Link href="/book" className="btn btn-primary">
@@ -58,16 +56,18 @@ export default function HomePage() {
           <div className={styles.heroImageWrap}>
             <div className={styles.heroImage}>
               <img
-                src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80"
+                src={c.hero_image}
                 alt="Ombre powder brows treatment at Aim & More"
                 className={styles.heroImg}
               />
             </div>
             <div className={styles.heroImageRing} aria-hidden="true" />
-            <div className={styles.heroImageBadge}>
-              <span className={styles.heroImageBadgeNum}>500+</span>
-              <span className={styles.heroImageBadgeLabel}>Happy clients</span>
-            </div>
+            {c.hero_badge_num && (
+              <div className={styles.heroImageBadge}>
+                <span className={styles.heroImageBadgeNum}>{c.hero_badge_num}</span>
+                <span className={styles.heroImageBadgeLabel}>{c.hero_badge_label}</span>
+              </div>
+            )}
           </div>
         </div>
         <div className={styles.heroScroll} aria-hidden="true">
@@ -99,22 +99,13 @@ export default function HomePage() {
           <div className={styles.aboutText}>
             <p className={styles.sectionLabel}>The Studio</p>
             <h2 className={styles.sectionTitle}>
-              Where confidence
+              {c.about_title_1}
               <br />
-              is crafted.
+              {c.about_title_2}
             </h2>
             <div className="divider divider--left" style={{ margin: "24px 0" }} />
-            <p className={styles.aboutPara}>
-              Aim & More is a boutique beauty studio in Suriname offering a curated
-              menu of nail care, waxing, facials, and permanent make-up. Every
-              treatment is performed with precision, care, and an eye for detail —
-              because you deserve to feel extraordinary.
-            </p>
-            <p className={styles.aboutPara}>
-              Our signature Ombre Powder Brows and Lipblush PMU treatments are
-              fully inclusive of the follow-up touch-up, ensuring your results
-              last beautifully.
-            </p>
+            <p className={styles.aboutPara}>{c.about_para_1}</p>
+            <p className={styles.aboutPara}>{c.about_para_2}</p>
             <Link href="/services" className="btn btn-outline" style={{ marginTop: "32px" }}>
               Explore All Services
             </Link>
@@ -122,7 +113,7 @@ export default function HomePage() {
           <div className={styles.aboutImageWrap}>
             <div className={styles.aboutImage}>
               <img
-                src="/images/shea.jpg"
+                src={c.about_image}
                 alt="Shea in the Aim & More studio"
                 className={styles.aboutImg}
               />
@@ -146,7 +137,7 @@ export default function HomePage() {
           </div>
 
           <div className={styles.magazineGrid}>
-            {FEATURED_SERVICES.map((s, idx) => (
+            {featured.map((s) => (
               <div key={s.name} className={styles.magazineCard}>
                 {/* Image Placeholder with Gold Ring Motif */}
                 <div className={styles.magazineImageWrap}>
@@ -186,16 +177,16 @@ export default function HomePage() {
           </div>
 
           <div className={styles.galleryStrip}>
-            {GALLERY.map((g) => (
-              <ZoomOnView key={g.src} className={styles.galleryCard}>
-                <img src={g.src} alt={g.alt} className={styles.galleryImg} />
+            {gallery.map((src, i) => (
+              <ZoomOnView key={src + i} className={styles.galleryCard}>
+                <img src={src} alt={`Result from the studio, photo ${i + 1}`} className={styles.galleryImg} />
               </ZoomOnView>
             ))}
           </div>
 
           <div className={styles.galleryFooter}>
             <a
-              href="https://instagram.com/aimnmore"
+              href={BUSINESS.socials.instagram.url}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-ghost btn-sm"
@@ -206,7 +197,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Testimonials ──────────────────────────────────────── */}
+      {/* ── Testimonials (only real reviews, set in Admin → Website) ── */}
+      {reviews.length > 0 && (
       <section className={`section-sm ${styles.testimonials}`}>
         <div className="container">
           <p className={styles.sectionLabel} style={{ textAlign: "center" }}>
@@ -217,8 +209,8 @@ export default function HomePage() {
           </h2>
 
           <div className={styles.testimonialsGrid}>
-            {TESTIMONIALS.map((t) => (
-              <div key={t.name} className={styles.testimonialCard}>
+            {reviews.map((t) => (
+              <div key={t.quote} className={styles.testimonialCard}>
                 <p className={styles.testimonialQuote}>&ldquo;{t.quote}&rdquo;</p>
                 <div className={styles.testimonialFooter}>
                   <span className={styles.testimonialName}>{t.name}</span>
@@ -229,14 +221,15 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* ── CTA banner ────────────────────────────────────────── */}
       <section className={styles.cta}>
         <div className="container">
           <div className={styles.ctaInner}>
-            <h2 className={styles.ctaTitle}>Ready to glow?</h2>
+            <h2 className={styles.ctaTitle}>{c.cta_title}</h2>
             <p className={styles.ctaSub}>
-              Book your appointment online — it only takes a minute.
+              {c.cta_sub}
             </p>
             <Link href="/book" className="btn btn-primary">
               Book Now
