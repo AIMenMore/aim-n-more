@@ -1,8 +1,11 @@
 import Link from "next/link";
 import styles from "./Footer.module.css";
 import { BUSINESS } from "@/lib/business";
+import { getLang } from "@/lib/lang-server";
+import { t } from "@/lib/i18n";
 
-export default function Footer() {
+export default async function Footer() {
+  const lang = await getLang();
   return (
     <footer className={styles.footer}>
       <span className="gold-line" />
@@ -10,22 +13,22 @@ export default function Footer() {
         <div className={styles.brand}>
           <span className={styles.logo}>AIM &amp; MORE</span>
           <p className={styles.tagline}>
-            Because you deserve good brows and sexy lips, every day.
+            {t(lang, "footer_tagline")}
           </p>
         </div>
 
         <div className={styles.columns}>
           <div className={styles.col}>
-            <p className={styles.colTitle}>Hours</p>
-            <p>{BUSINESS.hours.days}</p>
+            <p className={styles.colTitle}>{t(lang, "footer_hours")}</p>
+            <p>{t(lang, "hours_days")}</p>
             <p>{BUSINESS.hours.time}</p>
             <p style={{ color: "var(--cream-muted)", fontSize: "13px", marginTop: "4px" }}>
-              {BUSINESS.hours.closed}
+              {t(lang, "hours_closed")}
             </p>
           </div>
 
           <div className={styles.col}>
-            <p className={styles.colTitle}>Contact</p>
+            <p className={styles.colTitle}>{t(lang, "footer_contact")}</p>
             <a href={`tel:${BUSINESS.phone.tel}`} className={styles.colLink}>
               {BUSINESS.phone.display}
             </a>
@@ -33,12 +36,12 @@ export default function Footer() {
               WhatsApp
             </a>
             <a href={`mailto:${BUSINESS.email}`} className={styles.colLink}>
-              Email us
+              {t(lang, "footer_email")}
             </a>
           </div>
 
           <div className={styles.col}>
-            <p className={styles.colTitle}>Follow</p>
+            <p className={styles.colTitle}>{t(lang, "footer_follow")}</p>
             <a
               href={BUSINESS.socials.instagram.url}
               className={styles.colLink}
@@ -68,7 +71,7 @@ export default function Footer() {
       </div>
 
       <div className={styles.bottom}>
-        <p>© {new Date().getFullYear()} Aim &amp; More. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Aim &amp; More. {t(lang, "footer_rights")}</p>
         <a
           href="https://wa.me/5978902214"
           target="_blank"

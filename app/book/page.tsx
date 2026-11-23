@@ -3,22 +3,23 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase, type Service, type Availability } from "@/lib/supabase";
 import { salonToday, addDays, salonToISO, freeSlots, type BusyBlock } from "@/lib/time";
-import { BUSINESS } from "@/lib/business";
+import { useLang } from "@/components/LangProvider";
+import { LOCALES, categoryName, type Lang, type TKey } from "@/lib/i18n";
 import styles from "./page.module.css";
 
-const STEPS = ["Service", "Date & Time", "Your Info", "Confirm"];
+const STEPS: TKey[] = ["step_service", "step_datetime", "step_info", "step_confirm"];
 const DAYS_AHEAD = 14;
 
 // Dates are based on Suriname's calendar, so the label and the booked day always match.
-function getBookableDays(): { date: Date; label: string; value: string }[] {
+function getBookableDays(lang: Lang): { date: Date; label: string; value: string }[] {
   const today = salonToday();
   const days = [];
   for (let i = 1; i <= DAYS_AHEAD; i++) {
     const value = addDays(today, i);
     // Local noon on that calendar date: getDay() is correct in any time zone
     const date = new Date(`${value}T12:00:00`);
-    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
-    const label = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    const dayName = date.toLocaleDateString(LOCALES[lang], { weekday: "short" });
+    const label = date.toLocaleDateString(LOCALES[lang], { month: "short", day: "numeric" });
     days.push({ date, label: `${dayName} ${label}`, value });
   }
   return days;
@@ -34,6 +35,7 @@ async function fetchBusy(day: string): Promise<BusyBlock[]> {
 function BookingForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { lang, t } = useLang();
 
   const [step, setStep] = useState(0);
   const [services, setServices] = useState<Service[]>([]);
@@ -52,7 +54,7 @@ function BookingForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const days = getBookableDays();
+  const days = getBookableDays(lang);
 
   // ── Fetch services once on mount ─────────────────────────────────
   useEffect(() => {
@@ -122,7 +124,7 @@ function BookingForm() {
     setBusy([]);
     fetchBusy(selectedDate)
       .then((b) => { if (!cancelled) setBusy(b); })
-      .catch(() => { if (!cancelled) setError("Could not load the agenda. Please refresh the page."); });
+      .catch(() => { if (!cancelled) setError(t("err_agenda")); });
     return () => { cancelled = true; };
   }, [selectedDate]);
 
@@ -147,7 +149,7 @@ function BookingForm() {
   // ── Submit: one appointment row per service ───────────────────────
   const handleSubmit = async () => {
     if (!selectedServices.length || !selectedDate || !selectedTime || !clientName || !clientPhone) {
-      setError("Please fill in all required fields.");
+      setError(t("err_required"));
       return;
     }
     setLoading(true);
@@ -163,13 +165,13 @@ function BookingForm() {
       if (!stillFree) {
         setBusy(latestBusy);
         setLoading(false);
-        setError("Sorry, this time was just booked by someone else. Please choose another time.");
+        setError(t("err_taken"));
         setStep(1);
         return;
       }
     } catch {
       setLoading(false);
-      setError("Something went wrong. Please try again.");
+      setError(t("err_generic"));
       return;
     }
 
@@ -189,7 +191,7 @@ function BookingForm() {
     const { error: dbError } = await supabase.from("appointments").insert(rows);
     setLoading(false);
     if (dbError) {
-      setError("Something went wrong. Please try again.");
+      setError(t("err_generic"));
     } else {
       router.push("/book/success");
     }
@@ -207,8 +209,8 @@ function BookingForm() {
       {/* Header */}
       <div className={styles.header}>
         <div className="container">
-          <p className={styles.eyebrow}>Online booking</p>
-          <h1 className={styles.title}>Book an Appointment</h1>
+          <p className={styles.eyebrow}>{t("book_eyebrow")}</p>
+          <h1 className={styles.title}>{t("book_title")}</h1>
         </div>
       </div>
 
@@ -219,7 +221,7 @@ function BookingForm() {
             {STEPS.map((s, i) => (
               <div key={s} className={`${styles.step} ${i === step ? styles.stepActive : ""} ${i < step ? styles.stepDone : ""}`}>
                 <span className={styles.stepNum}>{i < step ? "✓" : i + 1}</span>
-                <span className={styles.stepLabel}>{s}</span>
+                <span className={styles.stepLabel}>{t(s)}</span>
               </div>
             ))}
           </div>
@@ -232,13 +234,13 @@ function BookingForm() {
         {/* ── Step 0: Service selection (multi-select) ── */}
         {step === 0 && (
           <div className={styles.stepContent}>
-            <h2 className={styles.stepTitle}>Choose Services</h2>
+            <h2 className={styles.stepTitle}>{t("choose_services")}</h2>
             <p className={styles.stepSub}>
-              You can select <strong>multiple services</strong> for the same appointment.
+              {t("multi_hint_1")} <strong>{t("multi_hint_2")}</strong> {t("multi_hint_3")}
             </p>
             {categories.map((cat) => (
               <div key={cat} className={styles.catGroup}>
-                <p className={styles.catLabel}>{cat}</p>
+                <p className={styles.catLabel}>{categoryName(lang, cat)}</p>
                   <div className={styles.magazineServiceGrid}>
                     {services.filter((s) => s.category === cat).map((s) => {
                       const isSelected = !!selectedServices.find((x) => x.id === s.id);
@@ -274,16 +276,16 @@ function BookingForm() {
                               {isSelected ? (
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                   <circle cx="10" cy="10" r="10" fill="var(--gold)" />
-                                  <path d="M6 10l3 3 5-6" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                  <path d="M6 10l3 3 5-6" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                               ) : (
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                  <circle cx="10" cy="10" r="9.5" fill="none" stroke="rgba(245,241,232,0.2)" />
+                                  <circle cx="10" cy="10" r="9.5" fill="none" stroke="rgba(58, 46, 40,0.2)" />
                                 </svg>
                               )}
                             </div>
                             <h3 className={styles.magazineName}>{s.name}</h3>
-                            <p className={styles.magazineMeta}>~{s.duration_minutes} min duration</p>
+                            <p className={styles.magazineMeta}>~{s.duration_minutes} {t("duration")}</p>
                           </div>
                         </button>
                       );
@@ -297,16 +299,16 @@ function BookingForm() {
               <div className={styles.stickyBar}>
                 <div className={styles.stickyBarInfo}>
                   <span className={styles.stickyBarCount}>
-                    {selectedServices.length} service{selectedServices.length > 1 ? "s" : ""} selected
+                    {selectedServices.length} {selectedServices.length > 1 ? t("selected_count_n") : t("selected_count_1")}
                   </span>
-                  <span className={styles.stickyBarPrice}>Total: SRD {totalPrice.toLocaleString()}</span>
+                  <span className={styles.stickyBarPrice}>{t("total")}: SRD {totalPrice.toLocaleString()}</span>
                 </div>
                 <button
                   className="btn btn-primary"
                   onClick={() => setStep(1)}
                   id="continue-to-date"
                 >
-                  Continue →
+                  {t("continue")}
                 </button>
               </div>
             )}
@@ -316,20 +318,20 @@ function BookingForm() {
         {/* ── Step 1: Date & Time ── */}
         {step === 1 && selectedServices.length > 0 && (
           <div className={styles.stepContent}>
-            <h2 className={styles.stepTitle}>Pick a Date & Time</h2>
+            <h2 className={styles.stepTitle}>{t("pick_datetime")}</h2>
             <p className={styles.stepSub}>
               {selectedServices.length === 1
-                ? <>Selected: <strong>{selectedServices[0].name}</strong></>
-                : <><strong>{selectedServices.length} services</strong> — {selectedServices.map(s => s.name).join(", ")}</>
+                ? <>{t("selected")}: <strong>{selectedServices[0].name}</strong></>
+                : <><strong>{selectedServices.length} {t("services_word")}</strong> — {selectedServices.map(s => s.name).join(", ")}</>
               }
             </p>
 
             {loadingAvail ? (
-              <p style={{ color: "var(--cream-dim)", fontSize: "14px" }}>Loading schedule…</p>
+              <p style={{ color: "var(--cream-dim)", fontSize: "14px" }}>{t("loading_schedule")}</p>
             ) : (
               <>
                 <div className={styles.field}>
-                  <p className={styles.fieldLabel}>Date</p>
+                  <p className={styles.fieldLabel}>{t("date")}</p>
                   <div className={styles.dateGrid}>
                     {days.map(({ value, label, date }) => {
                       const dow = date.getDay();
@@ -345,7 +347,7 @@ function BookingForm() {
                           id={`date-${value}`}
                         >
                           {label}
-                          {isClosed && <span className={styles.closedTag}>Closed</span>}
+                          {isClosed && <span className={styles.closedTag}>{t("closed")}</span>}
                         </button>
                       );
                     })}
@@ -354,19 +356,19 @@ function BookingForm() {
 
                 {selectedDate && (
                   <div className={styles.field} style={{ marginTop: "28px" }}>
-                    <p className={styles.fieldLabel}>Time</p>
+                    <p className={styles.fieldLabel}>{t("time")}</p>
                     {availableSlots.length === 0 ? (
-                      <p className={styles.noSlots}>No slots available for this date.</p>
+                      <p className={styles.noSlots}>{t("no_slots")}</p>
                     ) : (
                       <div className={styles.timeGrid}>
-                        {availableSlots.map((t) => (
+                        {availableSlots.map((slot) => (
                           <button
-                            key={t}
-                            id={`time-${t}`}
-                            className={`${styles.timeChip} ${selectedTime === t ? styles.timeSelected : ""}`}
-                            onClick={() => setSelectedTime(t)}
+                            key={slot}
+                            id={`time-${slot}`}
+                            className={`${styles.timeChip} ${selectedTime === slot ? styles.timeSelected : ""}`}
+                            onClick={() => setSelectedTime(slot)}
                           >
-                            {t}
+                            {slot}
                           </button>
                         ))}
                       </div>
@@ -377,13 +379,13 @@ function BookingForm() {
             )}
 
             <div className={styles.navRow}>
-              <button className="btn btn-ghost" onClick={() => setStep(0)}>← Back</button>
+              <button className="btn btn-ghost" onClick={() => setStep(0)}>{t("back")}</button>
               <button
                 className="btn btn-primary"
                 disabled={!selectedDate || !selectedTime}
                 onClick={() => setStep(2)}
               >
-                Continue →
+                {t("continue")}
               </button>
             </div>
           </div>
@@ -392,20 +394,20 @@ function BookingForm() {
         {/* ── Step 2: Client info + note ── */}
         {step === 2 && (
           <div className={styles.stepContent}>
-            <h2 className={styles.stepTitle}>Your Details</h2>
+            <h2 className={styles.stepTitle}>{t("your_details")}</h2>
             <div className={styles.formFields}>
               <div className="field">
-                <label htmlFor="client-name">Full Name</label>
+                <label htmlFor="client-name">{t("full_name")}</label>
                 <input
                   id="client-name"
                   type="text"
-                  placeholder="e.g. Maria Lopes"
+                  placeholder={t("name_placeholder")}
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                 />
               </div>
               <div className="field">
-                <label htmlFor="client-phone">Phone / WhatsApp</label>
+                <label htmlFor="client-phone">{t("phone_label")}</label>
                 <input
                   id="client-phone"
                   type="tel"
@@ -416,11 +418,11 @@ function BookingForm() {
               </div>
               <div className="field">
                 <label htmlFor="client-note">
-                  Note for the salon <span style={{ color: "var(--cream-muted)", fontWeight: 400 }}>(optional)</span>
+                  {t("note_label")} <span style={{ color: "var(--cream-muted)", fontWeight: 400 }}>{t("optional")}</span>
                 </label>
                 <textarea
                   id="client-note"
-                  placeholder="Allergies, preferences, special requests…"
+                  placeholder={t("note_placeholder")}
                   value={clientNote}
                   onChange={(e) => setClientNote(e.target.value)}
                   rows={3}
@@ -432,13 +434,13 @@ function BookingForm() {
               </div>
             </div>
             <div className={styles.navRow}>
-              <button className="btn btn-ghost" onClick={() => setStep(1)}>← Back</button>
+              <button className="btn btn-ghost" onClick={() => setStep(1)}>{t("back")}</button>
               <button
                 className="btn btn-primary"
                 disabled={!clientName.trim() || !clientPhone.trim()}
                 onClick={() => setStep(3)}
               >
-                Review →
+                {t("review")}
               </button>
             </div>
           </div>
@@ -447,11 +449,11 @@ function BookingForm() {
         {/* ── Step 3: Confirm ── */}
         {step === 3 && selectedServices.length > 0 && (
           <div className={styles.stepContent}>
-            <h2 className={styles.stepTitle}>Confirm Booking</h2>
+            <h2 className={styles.stepTitle}>{t("confirm_booking")}</h2>
             <div className={`card ${styles.summary}`}>
               {/* Services list */}
               <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Service{selectedServices.length > 1 ? "s" : ""}</span>
+                <span className={styles.summaryLabel}>{selectedServices.length > 1 ? t("service_n") : t("service_1")}</span>
                 <span className={styles.summaryValue}>
                   {selectedServices.length === 1
                     ? selectedServices[0].name
@@ -466,46 +468,46 @@ function BookingForm() {
                 </span>
               </div>
               <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Date</span>
+                <span className={styles.summaryLabel}>{t("date")}</span>
                 <span className={styles.summaryValue}>
-                  {new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {
+                  {new Date(selectedDate + "T12:00:00").toLocaleDateString(LOCALES[lang], {
                     weekday: "long", year: "numeric", month: "long", day: "numeric",
                   })}
                 </span>
               </div>
               <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Time</span>
+                <span className={styles.summaryLabel}>{t("time")}</span>
                 <span className={styles.summaryValue}>{selectedTime}</span>
               </div>
               <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Name</span>
+                <span className={styles.summaryLabel}>{t("name")}</span>
                 <span className={styles.summaryValue}>{clientName}</span>
               </div>
               <div className={styles.summaryRow}>
-                <span className={styles.summaryLabel}>Phone</span>
+                <span className={styles.summaryLabel}>{t("phone")}</span>
                 <span className={styles.summaryValue}>{clientPhone}</span>
               </div>
               {clientNote.trim() && (
                 <div className={styles.summaryRow}>
-                  <span className={styles.summaryLabel}>Note</span>
+                  <span className={styles.summaryLabel}>{t("note")}</span>
                   <span className={styles.summaryValue} style={{ fontStyle: "italic", color: "var(--cream-dim)" }}>
                     {clientNote}
                   </span>
                 </div>
               )}
-              <div className={styles.summaryRow} style={{ paddingTop: "16px", borderTop: "1px solid rgba(245,241,232,0.1)" }}>
-                <span className={styles.summaryLabel}>Total</span>
+              <div className={styles.summaryRow} style={{ paddingTop: "16px", borderTop: "1px solid rgba(58, 46, 40,0.1)" }}>
+                <span className={styles.summaryLabel}>{t("total")}</span>
                 <span className={styles.summaryPrice}>SRD {totalPrice.toLocaleString()}</span>
               </div>
             </div>
             <p className={styles.paymentNote}>
-              💳 Payment: {BUSINESS.payment.methods}.<br />
-              ⏰ {BUSINESS.policies.join(" ")}
+              💳 {t("payment")}: {t("payment_methods")}.<br />
+              ⏰ {t("policy_late")} {t("policy_cancelled")} {t("policy_notice")}
             </p>
             <div className={styles.navRow}>
-              <button className="btn btn-ghost" onClick={() => setStep(2)}>← Back</button>
+              <button className="btn btn-ghost" onClick={() => setStep(2)}>{t("back")}</button>
               <button className="btn btn-primary" onClick={handleSubmit} disabled={loading} id="confirm-booking">
-                {loading ? "Booking…" : "Confirm Booking"}
+                {loading ? t("booking") : t("confirm_booking")}
               </button>
             </div>
           </div>
@@ -517,7 +519,7 @@ function BookingForm() {
 
 export default function BookPage() {
   return (
-    <Suspense fallback={<div style={{ padding: "200px 0", textAlign: "center", color: "var(--cream-dim)" }}>Loading...</div>}>
+    <Suspense fallback={<div style={{ padding: "200px 0", textAlign: "center", color: "var(--cream-dim)" }}>…</div>}>
       <BookingForm />
     </Suspense>
   );

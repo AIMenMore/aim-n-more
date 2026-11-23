@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import type { Lang } from "@/lib/i18n";
 
 // Everything Shea can change herself in Admin → Website.
 // The values below are the defaults; whatever she saves is stored in the
@@ -109,14 +110,46 @@ export const CONTENT_GROUPS: ContentGroup[] = [
   },
 ];
 
+// Dutch versions of the default texts. Shea's Dutch texts are saved as "<key>__nl".
+const NL_DEFAULTS: Record<string, string> = {
+  hero_eyebrow: "Aim & More Studio · Suriname",
+  hero_title_1: "Omdat je het verdient:",
+  hero_title_highlight: "mooie wenkbrauwen & sexy lippen,",
+  hero_title_2: "elke dag.",
+  hero_sub: "Nagels · pedicure · harsen · permanente make-up",
+  hero_badge_label: "Blije klanten",
+  about_title_1: "Waar zelfvertrouwen",
+  about_title_2: "gemaakt wordt.",
+  about_para_1: "Aim & More is een boutique beautystudio in Suriname met een zorgvuldig gekozen aanbod: nagelverzorging, harsen, gezichtsbehandelingen en permanente make-up. Elke behandeling doen we met precisie, zorg en oog voor detail, want jij verdient het om je bijzonder te voelen.",
+  about_para_2: "Onze signature Ombre Powder Brows en Lipblush (PMU) zijn inclusief de touch-up, zodat je resultaat mooi blijft.",
+  feat1_category: "Permanente make-up",
+  feat1_tag: "Incl. touch-up",
+  feat2_category: "Manicure / Pedicure",
+  feat3_name: "Brazilian harsen",
+  feat3_category: "Harsen",
+  feat4_category: "Gezichtsbehandeling",
+  cta_title: "Klaar om te stralen?",
+  cta_sub: "Boek je afspraak online, het duurt maar een minuut.",
+};
+
+/** Text fields have one value per language; photos are shared. */
+export const TRANSLATED_TYPES: FieldType[] = ["text", "textarea"];
+export const langKey = (key: string, lang: Lang) => (lang === "en" ? key : `${key}__${lang}`);
+
 export type SiteContent = Record<string, string>;
 
 export const DEFAULT_CONTENT: SiteContent = Object.fromEntries(
-  CONTENT_GROUPS.flatMap((g) => g.fields.map((f) => [f.key, f.default]))
+  CONTENT_GROUPS.flatMap((g) =>
+    g.fields.flatMap((f) =>
+      TRANSLATED_TYPES.includes(f.type)
+        ? [[f.key, f.default], [langKey(f.key, "nl"), NL_DEFAULTS[f.key] ?? f.default]]
+        : [[f.key, f.default]]
+    )
+  )
 );
 
-/** Defaults merged with whatever Shea saved. Never throws. */
-export async function getSiteContent(): Promise<SiteContent> {
+/** All saved rows merged over the defaults (every language). Never throws. */
+export async function getAllSiteContent(): Promise<SiteContent> {
   try {
     const { data, error } = await supabase.from("site_content").select("key, value");
     if (error || !data) return { ...DEFAULT_CONTENT };
@@ -127,4 +160,17 @@ export async function getSiteContent(): Promise<SiteContent> {
   } catch {
     return { ...DEFAULT_CONTENT };
   }
+}
+
+/** The content for one language, keyed by the plain field key. */
+export async function getSiteContent(lang: Lang): Promise<SiteContent> {
+  const all = await getAllSiteContent();
+  const out: SiteContent = {};
+  for (const g of CONTENT_GROUPS) {
+    for (const f of g.fields) {
+      // An empty translation falls back to the English text
+      out[f.key] = TRANSLATED_TYPES.includes(f.type) ? all[langKey(f.key, lang)] || all[f.key] : all[f.key];
+    }
+  }
+  return out;
 }

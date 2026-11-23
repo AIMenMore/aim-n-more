@@ -158,7 +158,7 @@ export default function AdminAvailabilityPage() {
                 min={new Date().toISOString().split("T")[0]}
                 style={{
                   background: "var(--black-light)",
-                  border: "1px solid rgba(245,241,232,0.1)",
+                  border: "1px solid rgba(58, 46, 40,0.1)",
                   borderRadius: "var(--radius-sm)",
                   padding: "10px 14px",
                   color: "var(--cream)",

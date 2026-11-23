@@ -2,15 +2,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Navbar.module.css";
+import { useLang } from "@/components/LangProvider";
+import { LANGS, LANG_LABELS } from "@/lib/i18n";
 
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/services", label: "Services" },
-  { href: "/book", label: "Book Now" },
-];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { lang, setLang, t } = useLang();
+  const NAV_LINKS = [
+    { href: "/", label: t("nav_home") },
+    { href: "/services", label: t("nav_services") },
+    { href: "/book", label: t("nav_book") },
+  ];
   const isAdmin = pathname.startsWith("/admin");
   if (isAdmin) return null;
 
@@ -34,9 +37,24 @@ export default function Navbar() {
           ))}
         </nav>
 
-        <Link href="/book" className="btn btn-primary btn-sm">
-          Book Now
-        </Link>
+        <div className={styles.right}>
+          <div className={styles.langSwitch} role="group" aria-label={t("lang_label")}>
+            {LANGS.map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLang(l)}
+                className={`${styles.langBtn} ${l === lang ? styles.langActive : ""}`}
+                aria-pressed={l === lang}
+              >
+                {LANG_LABELS[l]}
+              </button>
+            ))}
+          </div>
+          <Link href="/book" className="btn btn-primary btn-sm">
+            {t("nav_book")}
+          </Link>
+        </div>
       </div>
     </header>
   );

@@ -174,8 +174,8 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--cream-muted);
-  background: rgba(245,241,232,0.05);
-  border: 1px solid rgba(245,241,232,0.1);
+  background: rgba(58, 46, 40,0.05);
+  border: 1px solid rgba(58, 46, 40,0.1);
   border-radius: 999px;
   padding: 2px 8px;
 }

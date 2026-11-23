@@ -58,13 +58,15 @@
 .stepActive {
   border-color: var(--rose-border);
   background: var(--rose-dim);
-  color: var(--rose);
+  color: var(--rose-hover);
+  --step-color: var(--rose);
 }
 
 .stepDone {
   border-color: rgba(96, 158, 115, 0.30);
   background: rgba(96, 158, 115, 0.08);
   color: #3d7a57;
+  --step-color: #3d7a57;
 }
 
 .stepNum {
@@ -74,7 +76,8 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: currentColor;
+  /* was "currentColor" while also setting white text: white on white */
+  background: var(--step-color, var(--text-muted));
   color: #fff;
   font-size: 10px;
   font-weight: 700;

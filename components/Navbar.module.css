@@ -102,3 +102,32 @@
   width: auto;
   display: block;
 }
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.langSwitch {
+  display: inline-flex;
+  border: 1px solid var(--rose-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.langBtn {
+  background: transparent;
+  border: none;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+  cursor: pointer;
+}
+
+.langActive {
+  background: var(--rose);
+  color: #fff;
+}

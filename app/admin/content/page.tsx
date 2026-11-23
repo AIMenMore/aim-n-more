@@ -2,7 +2,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { compressImage } from "@/lib/image";
-import { CONTENT_GROUPS, DEFAULT_CONTENT, type SiteContent } from "@/lib/content";
+import { CONTENT_GROUPS, DEFAULT_CONTENT, TRANSLATED_TYPES, langKey, type SiteContent } from "@/lib/content";
+import { LANGS, type Lang } from "@/lib/i18n";
+
+const LANG_NAMES: Record<Lang, string> = { nl: "Nederlands", en: "English" };
 import styles from "../services/page.module.css";
 
 // Admin → Website: Shea changes the home page texts and photos here.
@@ -97,25 +100,35 @@ export default function ContentAdminPage() {
           <div style={{ display: "grid", gap: "18px" }}>
             {group.fields.map((f) => (
               <div key={f.key} className="field">
-                <label htmlFor={`c-${f.key}`}>
-                  {f.label}
-                  {values[f.key] !== (DEFAULT_CONTENT[f.key] ?? "") && (
-                    <button
-                      type="button"
-                      onClick={() => resetField(f.key)}
-                      style={{ marginLeft: 10, fontSize: 12, background: "none", border: "none", textDecoration: "underline", cursor: "pointer", color: "inherit", opacity: 0.7 }}
-                    >
-                      back to original
-                    </button>
-                  )}
-                </label>
+                <label htmlFor={`c-${f.key}`}>{f.label}</label>
 
-                {f.type === "text" && (
-                  <input id={`c-${f.key}`} type="text" value={values[f.key] ?? ""} onChange={(e) => set(f.key, e.target.value)} />
-                )}
-
-                {f.type === "textarea" && (
-                  <textarea id={`c-${f.key}`} rows={4} value={values[f.key] ?? ""} onChange={(e) => set(f.key, e.target.value)} />
+                {TRANSLATED_TYPES.includes(f.type) && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+                    {LANGS.map((l) => {
+                      const k = langKey(f.key, l);
+                      return (
+                        <div key={k}>
+                          <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 4, display: "flex", gap: 8 }}>
+                            {LANG_NAMES[l]}
+                            {values[k] !== (DEFAULT_CONTENT[k] ?? "") && (
+                              <button
+                                type="button"
+                                onClick={() => resetField(k)}
+                                style={{ fontSize: 12, fontWeight: 400, background: "none", border: "none", textDecoration: "underline", cursor: "pointer", color: "inherit" }}
+                              >
+                                back to original
+                              </button>
+                            )}
+                          </div>
+                          {f.type === "text" ? (
+                            <input id={l === "nl" ? `c-${f.key}` : undefined} type="text" value={values[k] ?? ""} onChange={(e) => set(k, e.target.value)} />
+                          ) : (
+                            <textarea id={l === "nl" ? `c-${f.key}` : undefined} rows={4} value={values[k] ?? ""} onChange={(e) => set(k, e.target.value)} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
 
                 {f.type === "image" && (

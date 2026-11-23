@@ -2,10 +2,12 @@ import { supabase, type Service } from "@/lib/supabase";
 import Link from "next/link";
 import styles from "./page.module.css";
 import { BUSINESS } from "@/lib/business";
+import { getLang } from "@/lib/lang-server";
+import { t, categoryName } from "@/lib/i18n";
 
 const CATEGORY_ORDER = ["Facials", "Mani / Pedi", "Waxing", "PMU"];
 
-export const revalidate = 60; // revalidate every 60s
+// Rendered per visit (language comes from the visitor's choice)
 
 async function getServices(): Promise<Record<string, Service[]>> {
   const { data } = await supabase
@@ -23,6 +25,7 @@ async function getServices(): Promise<Record<string, Service[]>> {
 }
 
 export default async function ServicesPage() {
+  const lang = await getLang();
   const grouped = await getServices();
   const categories = CATEGORY_ORDER.filter((c) => grouped[c]);
 
@@ -31,11 +34,11 @@ export default async function ServicesPage() {
       {/* Header */}
       <section className={styles.header}>
         <div className="container">
-          <p className={styles.eyebrow}>What we offer</p>
-          <h1 className={styles.title}>Our Services</h1>
+          <p className={styles.eyebrow}>{t(lang, "services_eyebrow")}</p>
+          <h1 className={styles.title}>{t(lang, "services_title")}</h1>
           <div className="divider" style={{ marginTop: "20px" }} />
           <p className={styles.sub}>
-            All prices in Surinamese dollars (SRD). Book online or call{" "}
+            {t(lang, "services_prices")}{" "}
             <a href={`tel:${BUSINESS.phone.tel}`} className={styles.phone}>
               {BUSINESS.phone.display}
             </a>
@@ -48,12 +51,12 @@ export default async function ServicesPage() {
       <section className={`section ${styles.content}`}>
         <div className="container">
           {categories.length === 0 ? (
-            <p className={styles.empty}>No services available at this time.</p>
+            <p className={styles.empty}>{t(lang, "services_empty")}</p>
           ) : (
             categories.map((category) => (
               <div key={category} className={styles.category}>
                 <div className={styles.categoryHeader}>
-                  <h2 className={styles.categoryTitle}>{category}</h2>
+                  <h2 className={styles.categoryTitle}>{categoryName(lang, category)}</h2>
                   <span className="gold-line" style={{ flex: 1, marginLeft: "24px" }} />
                 </div>
                 <div className={styles.magazineGrid}>
@@ -94,7 +97,7 @@ export default async function ServicesPage() {
                           className={`btn btn-primary ${styles.magazineBookBtn}`}
                           id={`book-${service.id}`}
                         >
-                          Book Now
+                          {t(lang, "book_now")}
                         </Link>
                       </div>
                     </div>
@@ -109,9 +112,9 @@ export default async function ServicesPage() {
       {/* CTA */}
       <div className={styles.cta}>
         <div className="container" style={{ textAlign: "center" }}>
-          <p className={styles.ctaText}>Ready to treat yourself?</p>
+          <p className={styles.ctaText}>{t(lang, "services_cta")}</p>
           <Link href="/book" className="btn btn-primary" style={{ marginTop: "20px" }}>
-            Book Now
+            {t(lang, "book_now")}
           </Link>
         </div>
       </div>

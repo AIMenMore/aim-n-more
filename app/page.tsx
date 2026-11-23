@@ -3,12 +3,16 @@ import styles from "./page.module.css";
 import ZoomOnView from "@/components/ZoomOnView";
 import { BUSINESS } from "@/lib/business";
 import { getSiteContent } from "@/lib/content";
+import { getLang } from "@/lib/lang-server";
+import { t } from "@/lib/i18n";
 
 // Shea edits texts and photos in Admin → Website; refresh at most every 30 seconds
-export const revalidate = 30;
+// Rendered per visit (language comes from the visitor's choice)
 
 export default async function HomePage() {
-  const c = await getSiteContent();
+  const lang = await getLang();
+  const c = await getSiteContent(lang);
+  const policies = [t(lang, "policy_late"), t(lang, "policy_cancelled"), t(lang, "policy_notice")];
   const featured = [1, 2, 3, 4]
     .map((n) => ({
       name: c[`feat${n}_name`],
@@ -45,10 +49,10 @@ export default async function HomePage() {
             </p>
             <div className={styles.heroCta}>
               <Link href="/book" className="btn btn-primary">
-                Book an Appointment
+                {t(lang, "home_book")}
               </Link>
               <Link href="/services" className="btn btn-outline">
-                View Services
+                {t(lang, "home_view_services")}
               </Link>
             </div>
           </div>
@@ -80,9 +84,9 @@ export default async function HomePage() {
         <div className="container">
           <div className={styles.introGrid}>
             {[
-              { label: BUSINESS.hours.days, sub: "Open for appointments" },
-              { label: BUSINESS.hours.time, sub: "Working hours" },
-              { label: BUSINESS.phone.display, sub: "Call or WhatsApp" },
+              { label: t(lang, "hours_days"), sub: t(lang, "intro_open") },
+              { label: BUSINESS.hours.time, sub: t(lang, "intro_hours") },
+              { label: BUSINESS.phone.display, sub: t(lang, "intro_call") },
             ].map((item) => (
               <div key={item.label} className={styles.introItem}>
                 <span className={styles.introLabel}>{item.label}</span>
@@ -97,7 +101,7 @@ export default async function HomePage() {
       <section className={`section ${styles.about}`}>
         <div className={`container ${styles.aboutInner}`}>
           <div className={styles.aboutText}>
-            <p className={styles.sectionLabel}>The Studio</p>
+            <p className={styles.sectionLabel}>{t(lang, "studio_label")}</p>
             <h2 className={styles.sectionTitle}>
               {c.about_title_1}
               <br />
@@ -107,7 +111,7 @@ export default async function HomePage() {
             <p className={styles.aboutPara}>{c.about_para_1}</p>
             <p className={styles.aboutPara}>{c.about_para_2}</p>
             <Link href="/services" className="btn btn-outline" style={{ marginTop: "32px" }}>
-              Explore All Services
+              {t(lang, "explore_services")}
             </Link>
           </div>
           <div className={styles.aboutImageWrap}>
@@ -128,11 +132,11 @@ export default async function HomePage() {
         <div className="container">
           <div className={styles.featuredHeader}>
             <div>
-              <p className={styles.sectionLabel}>Signature Treatments</p>
-              <h2 className={styles.sectionTitle}>Our specialties</h2>
+              <p className={styles.sectionLabel}>{t(lang, "featured_label")}</p>
+              <h2 className={styles.sectionTitle}>{t(lang, "featured_title")}</h2>
             </div>
             <Link href="/services" className="btn btn-ghost btn-sm">
-              View all →
+              {t(lang, "view_all")}
             </Link>
           </div>
 
@@ -159,7 +163,7 @@ export default async function HomePage() {
                   <h3 className={styles.magazineTitle}>{s.name}</h3>
                   {s.tag && <p className={styles.magazineTag}>{s.tag}</p>}
                   <Link href="/book" className={`btn btn-primary ${styles.magazineBookBtn}`}>
-                    Book Now
+                    {t(lang, "book_now")}
                   </Link>
                 </div>
               </div>
@@ -172,8 +176,8 @@ export default async function HomePage() {
       <section className={`section ${styles.gallery}`}>
         <div className="container">
           <div className={styles.galleryHeader}>
-            <p className={styles.sectionLabel}>Straight From The Studio</p>
-            <h2 className={styles.sectionTitle}>The results speak</h2>
+            <p className={styles.sectionLabel}>{t(lang, "gallery_label")}</p>
+            <h2 className={styles.sectionTitle}>{t(lang, "gallery_title")}</h2>
           </div>
 
           <div className={styles.galleryStrip}>
@@ -191,7 +195,7 @@ export default async function HomePage() {
               rel="noopener noreferrer"
               className="btn btn-ghost btn-sm"
             >
-              See more on Instagram →
+              {t(lang, "gallery_more")}
             </a>
           </div>
         </div>
@@ -202,10 +206,10 @@ export default async function HomePage() {
       <section className={`section-sm ${styles.testimonials}`}>
         <div className="container">
           <p className={styles.sectionLabel} style={{ textAlign: "center" }}>
-            Client Stories
+            {t(lang, "reviews_label")}
           </p>
           <h2 className={`${styles.sectionTitle} ${styles.testimonialsTitle}`}>
-            Trusted by our regulars
+            {t(lang, "reviews_title")}
           </h2>
 
           <div className={styles.testimonialsGrid}>
@@ -232,7 +236,7 @@ export default async function HomePage() {
               {c.cta_sub}
             </p>
             <Link href="/book" className="btn btn-primary">
-              Book Now
+              {t(lang, "book_now")}
             </Link>
           </div>
         </div>
@@ -242,39 +246,39 @@ export default async function HomePage() {
       <section className={`section-sm ${styles.contact}`}>
         <div className="container">
           <div className={styles.policyBox}>
-            <p className={styles.contactTitle}>Good to know</p>
+            <p className={styles.contactTitle}>{t(lang, "good_to_know")}</p>
             <ul className={styles.policyList}>
-              {BUSINESS.policies.map((p) => <li key={p}>{p}</li>)}
-              <li>Payment: {BUSINESS.payment.methods}.</li>
+              {policies.map((p) => <li key={p}>{p}</li>)}
+              <li>{t(lang, "payment")}: {t(lang, "payment_methods")}.</li>
             </ul>
           </div>
           <p className={styles.sectionLabel} style={{ textAlign: "center", marginBottom: "40px" }}>
-            Find Us
+            {t(lang, "find_us")}
           </p>
           <div className={styles.contactGrid}>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>📍</span>
               <div>
-                <p className={styles.contactTitle}>Location</p>
+                <p className={styles.contactTitle}>{t(lang, "location")}</p>
                 <a href={BUSINESS.address.mapsUrl} target="_blank" rel="noopener noreferrer" className={styles.contactText}>
-                  {BUSINESS.address.line1}<br />{BUSINESS.address.line2}<br />{BUSINESS.address.city}
+                  {BUSINESS.address.line1}<br />{t(lang, "address_line2")}<br />{BUSINESS.address.city}
                 </a>
                 <p className={styles.contactText} style={{ fontStyle: "italic", marginTop: "6px" }}>
-                  {BUSINESS.homeServiceNote}
+                  {t(lang, "home_service_note")}
                 </p>
               </div>
             </div>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>📞</span>
               <div>
-                <p className={styles.contactTitle}>Phone / WhatsApp</p>
+                <p className={styles.contactTitle}>{t(lang, "phone_whatsapp")}</p>
                 <a href={`tel:${BUSINESS.phone.tel}`} className={styles.contactLink}>{BUSINESS.phone.display}</a>
               </div>
             </div>
             <div className={styles.contactItem}>
               <span className={styles.contactIcon}>📷</span>
               <div>
-                <p className={styles.contactTitle}>Socials</p>
+                <p className={styles.contactTitle}>{t(lang, "socials")}</p>
                 <a href={BUSINESS.socials.instagram.url} target="_blank" rel="noopener noreferrer" className={styles.contactLink}>
                   Instagram {BUSINESS.socials.instagram.label}
                 </a><br />

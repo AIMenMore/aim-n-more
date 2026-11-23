@@ -11,17 +11,17 @@
 
   /* Text */
   --text-main:       #3A2E28;   /* soft charcoal-brown */
-  --text-soft:       rgba(58, 46, 40, 0.65);
-  --text-muted:      rgba(58, 46, 40, 0.38);
+  --text-soft:       #554740;   /* was 65% transparent: too light to read */
+  --text-muted:      #6B5D53;   /* was 38% transparent: too light to read */
 
   /* Primary action – dusty rose */
-  --rose:            #C97B84;
-  --rose-hover:      #B86872;
+  --rose:            #9C4855;   /* deeper rose: readable as text and behind white button text */
+  --rose-hover:      #873C48;
   --rose-dim:        rgba(201, 123, 132, 0.14);
   --rose-border:     rgba(201, 123, 132, 0.32);
 
   /* Secondary accent – muted clay/terracotta */
-  --clay:            #B5654A;
+  --clay:            #8F4A33;   /* deeper clay: readable small labels */
   --clay-dim:        rgba(181, 101, 74, 0.12);
   --clay-border:     rgba(181, 101, 74, 0.30);
 
