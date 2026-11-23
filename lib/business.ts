@@ -1,7 +1,7 @@
 // All of Shea's business details in one place. Change them here and every page updates.
 
 export const BUSINESS = {
-  name: "Aim N More",
+  name: "Aim & More",
   owner: "Shea",
 
   hours: {
@@ -31,7 +31,7 @@ export const BUSINESS = {
     tiktok: { label: "@AIMnMore", url: "https://www.tiktok.com/@aimnmore" },
     facebook: {
       label: "AIM &more",
-      url: "https://www.facebook.com/search/top?q=AIM%20%26more",
+      url: "https://www.facebook.com/share/1NrYnm1wHF/",
     },
   },
 

@@ -11,7 +11,7 @@ const FEATURED_SERVICES = [
 ];
 
 const GALLERY = [
-  { src: "/images/before-after-hair.jpg", alt: "Hair treatment before and after at Aim N More" },
+  { src: "/images/before-after-hair.jpg", alt: "Hair treatment before and after at Aim & More" },
   { src: "https://images.unsplash.com/photo-1583001931096-959e9a1a6223?w=500&q=80", alt: "Ombre powder brow result close-up" },
   { src: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=80", alt: "Fresh manicure detail" },
   { src: "https://images.unsplash.com/photo-1588514727390-91fd5ebaef81?w=500&q=80", alt: "Lipblush PMU result" },
@@ -34,7 +34,7 @@ export default function HomePage() {
         <div className={styles.heroBg} aria-hidden="true" />
         <div className={`container ${styles.heroGrid}`}>
           <div className={styles.heroContent}>
-            <p className={styles.heroEyebrow}>Aim N More Studio · Suriname</p>
+            <p className={styles.heroEyebrow}>Aim &amp; More Studio · Suriname</p>
             <h1 className={styles.heroTitle}>
               Because you deserve
               <br />
@@ -59,7 +59,7 @@ export default function HomePage() {
             <div className={styles.heroImage}>
               <img
                 src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&q=80"
-                alt="Ombre powder brows treatment at Aim N More"
+                alt="Ombre powder brows treatment at Aim & More"
                 className={styles.heroImg}
               />
             </div>
@@ -105,7 +105,7 @@ export default function HomePage() {
             </h2>
             <div className="divider divider--left" style={{ margin: "24px 0" }} />
             <p className={styles.aboutPara}>
-              Aim N More is a boutique beauty studio in Suriname offering a curated
+              Aim & More is a boutique beauty studio in Suriname offering a curated
               menu of nail care, waxing, facials, and permanent make-up. Every
               treatment is performed with precision, care, and an eye for detail —
               because you deserve to feel extraordinary.
@@ -123,7 +123,7 @@ export default function HomePage() {
             <div className={styles.aboutImage}>
               <img
                 src="/images/shea.jpg"
-                alt="Shea in the Aim N More studio"
+                alt="Shea in the Aim & More studio"
                 className={styles.aboutImg}
               />
             </div>

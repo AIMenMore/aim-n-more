@@ -17,7 +17,7 @@ export default function Navbar() {
   return (
     <header className={styles.header}>
       <div className={`container ${styles.inner}`}>
-        <Link href="/" className={styles.logo} aria-label="Aim N More Home">
+        <Link href="/" className={styles.logo} aria-label="Aim & More Home">
           <img src="/images/logo.png" alt="Aim &amp; More" className={styles.logoImg} />
         </Link>
 

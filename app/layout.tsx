@@ -18,11 +18,11 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Aim N More | Nail · Pedicure · Waxing · PMU – Suriname",
+  title: "Aim & More | Nail · Pedicure · Waxing · PMU – Suriname",
   description:
     "Because you deserve good brows and sexy lips, every day. Premium beauty services in Suriname — nails, pedicures, waxing, and permanent make-up by Shea.",
   openGraph: {
-    title: "Aim N More",
+    title: "Aim & More",
     description: "Because you deserve good brows and sexy lips, every day.",
     type: "website",
   },

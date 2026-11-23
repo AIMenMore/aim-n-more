@@ -45,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarLogo}>
-          <span className={styles.logoText}>AIM N MORE</span>
+          <span className={styles.logoText}>AIM &amp; MORE</span>
           <span className={styles.logoBadge}>Admin</span>
         </div>
 

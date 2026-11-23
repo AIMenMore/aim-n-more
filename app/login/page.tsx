@@ -44,7 +44,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <span className={styles.logoText}>AIM N MORE</span>
+          <span className={styles.logoText}>AIM &amp; MORE</span>
           <span className={styles.logoSub}>Admin Portal</span>
         </div>
 

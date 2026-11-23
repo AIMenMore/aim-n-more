@@ -8,7 +8,7 @@ export default function Footer() {
       <span className="gold-line" />
       <div className={`container ${styles.inner}`}>
         <div className={styles.brand}>
-          <span className={styles.logo}>AIM N MORE</span>
+          <span className={styles.logo}>AIM &amp; MORE</span>
           <p className={styles.tagline}>
             Because you deserve good brows and sexy lips, every day.
           </p>
@@ -68,7 +68,7 @@ export default function Footer() {
       </div>
 
       <div className={styles.bottom}>
-        <p>© {new Date().getFullYear()} Aim N More. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Aim &amp; More. All rights reserved.</p>
         <Link href="/login" className={styles.adminLink}>
           Admin
         </Link>
