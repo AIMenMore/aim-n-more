@@ -44,6 +44,12 @@ CREATE TABLE IF NOT EXISTS availability (
   )
 );
 
+-- ─── Data API access (needed when new tables are not exposed automatically) ──
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT SELECT ON services, availability TO anon;
+GRANT INSERT ON appointments TO anon;
+GRANT SELECT, INSERT, UPDATE, DELETE ON services, appointments, availability TO authenticated;
+
 -- ─── Row Level Security ───────────────────────────────────────────
 ALTER TABLE services     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE appointments ENABLE ROW LEVEL SECURITY;
@@ -58,8 +64,18 @@ CREATE POLICY "Admin can manage services"
   ON services FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Appointments: public can insert (book)
+-- Visitors can only create a fresh, unpaid, pending booking for an active service
 CREATE POLICY "Public can create appointment"
-  ON appointments FOR INSERT WITH CHECK (true);
+  ON appointments FOR INSERT TO anon
+  WITH CHECK (
+    status = 'pending'
+    AND paid = false
+    AND date_time > now()
+    AND length(client_name) BETWEEN 1 AND 100
+    AND length(client_phone) BETWEEN 5 AND 30
+    AND (notes IS NULL OR length(notes) <= 1000)
+    AND EXISTS (SELECT 1 FROM services s WHERE s.id = service_id AND s.active)
+  );
 
 -- Appointments: authenticated (admin) can read and update
 CREATE POLICY "Admin can manage appointments"
@@ -121,9 +137,6 @@ ON CONFLICT DO NOTHING;
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('service-images', 'service-images', true)
 ON CONFLICT (id) DO NOTHING;
-
--- Enable RLS on storage objects if not enabled
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Allow public read access to service-images
 CREATE POLICY "Public Read Access" ON storage.objects
