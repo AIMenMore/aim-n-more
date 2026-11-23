@@ -11,26 +11,9 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
 const realSupabase = !USE_LOCAL_MOCK && typeof window !== "undefined" && supabaseUrl && supabaseUrl.startsWith("http")
   ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        storageKey: 'sb-auth-token',
-        storage: {
-          getItem: (key) => {
-            if (typeof document === 'undefined') return null;
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${key}=`);
-            if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
-            return null;
-          },
-          setItem: (key, value) => {
-            if (typeof document === 'undefined') return;
-            document.cookie = `${key}=${value}; path=/; max-age=31536000; SameSite=Lax; Secure`;
-          },
-          removeItem: (key) => {
-            if (typeof document === 'undefined') return;
-            document.cookie = `${key}=; path=/; max-age=-1`;
-          }
-        }
-      }
+      // Standard Supabase session storage (browser localStorage).
+      // The old cookie-based storage could exceed the 4 KB cookie limit and log the admin out.
+      auth: { persistSession: true, autoRefreshToken: true },
     })
   : (null as any);
 
