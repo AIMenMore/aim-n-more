@@ -2,18 +2,18 @@ import { createClient } from "@supabase/supabase-js";
 import { salonDateOf } from "./time";
 
 // Set to true to use LocalStorage/mock database, or false to use a live Supabase project
-const USE_LOCAL_MOCK = true;
+const USE_LOCAL_MOCK = false;
 
 // -------------------------------------------------------------
 // Real Supabase Client Configuration
 // -------------------------------------------------------------
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key";
-const realSupabase = !USE_LOCAL_MOCK && typeof window !== "undefined" && supabaseUrl && supabaseUrl.startsWith("http")
+const realSupabase = !USE_LOCAL_MOCK && supabaseUrl && supabaseUrl.startsWith("http")
   ? createClient(supabaseUrl, supabaseAnonKey, {
       // Standard Supabase session storage (browser localStorage).
       // The old cookie-based storage could exceed the 4 KB cookie limit and log the admin out.
-      auth: { persistSession: true, autoRefreshToken: true },
+      auth: { persistSession: typeof window !== "undefined", autoRefreshToken: typeof window !== "undefined" },
     })
   : (null as any);
 
