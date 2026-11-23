@@ -49,6 +49,8 @@ GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT SELECT ON services, availability TO anon;
 GRANT INSERT ON appointments TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON services, appointments, availability TO authenticated;
+-- TRUNCATE ignores row level security, so nobody but the owner may use it
+REVOKE TRUNCATE ON services, appointments, availability FROM anon, authenticated;
 
 -- ─── Row Level Security ───────────────────────────────────────────
 ALTER TABLE services     ENABLE ROW LEVEL SECURITY;
