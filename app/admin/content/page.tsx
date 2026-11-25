@@ -5,7 +5,7 @@ import { compressImage } from "@/lib/image";
 import { CONTENT_GROUPS, DEFAULT_CONTENT, TRANSLATED_TYPES, langKey, type SiteContent } from "@/lib/content";
 import { LANGS, type Lang } from "@/lib/i18n";
 
-const LANG_NAMES: Record<Lang, string> = { nl: "Nederlands", en: "English" };
+const LANG_NAMES: Record<Lang, string> = { nl: "Nederlands", en: "English", es: "Español" };
 import styles from "../services/page.module.css";
 
 // Admin → Website: Shea changes the home page texts and photos here.

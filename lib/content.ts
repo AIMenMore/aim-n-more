@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Lang } from "@/lib/i18n";
+import { LANGS, type Lang } from "@/lib/i18n";
 
 // Everything Shea can change herself in Admin → Website.
 // The values below are the defaults; whatever she saves is stored in the
@@ -132,6 +132,30 @@ const NL_DEFAULTS: Record<string, string> = {
   cta_sub: "Boek je afspraak online, het duurt maar een minuut.",
 };
 
+// Spanish versions of the default texts. Shea's Spanish texts are saved as "<key>__es".
+const ES_DEFAULTS: Record<string, string> = {
+  hero_eyebrow: "Aim & More Studio · Surinam",
+  hero_title_1: "Porque mereces",
+  hero_title_highlight: "cejas bonitas y labios sexys,",
+  hero_title_2: "cada día.",
+  hero_sub: "Uñas · pedicura · depilación · maquillaje permanente",
+  hero_badge_label: "Clientas felices",
+  about_title_1: "Donde se crea",
+  about_title_2: "la confianza.",
+  about_para_1: "Aim & More es un estudio de belleza boutique en Surinam con una selección cuidada de manicura, depilación, tratamientos faciales y maquillaje permanente. Cada tratamiento se hace con precisión, cariño y atención al detalle, porque mereces sentirte extraordinaria.",
+  about_para_2: "Nuestras Ombre Powder Brows y Lipblush (PMU) incluyen el retoque, para que tu resultado dure y luzca precioso.",
+  feat1_category: "Maquillaje permanente",
+  feat1_tag: "Retoque incluido",
+  feat2_category: "Manicura / Pedicura",
+  feat3_name: "Depilación brasileña",
+  feat3_category: "Depilación con cera",
+  feat4_category: "Tratamiento facial",
+  cta_title: "¿Lista para brillar?",
+  cta_sub: "Reserva tu cita en línea, solo toma un minuto.",
+};
+
+const LANG_DEFAULTS: Partial<Record<Lang, Record<string, string>>> = { nl: NL_DEFAULTS, es: ES_DEFAULTS };
+
 /** Text fields have one value per language; photos are shared. */
 export const TRANSLATED_TYPES: FieldType[] = ["text", "textarea"];
 export const langKey = (key: string, lang: Lang) => (lang === "en" ? key : `${key}__${lang}`);
@@ -142,7 +166,10 @@ export const DEFAULT_CONTENT: SiteContent = Object.fromEntries(
   CONTENT_GROUPS.flatMap((g) =>
     g.fields.flatMap((f) =>
       TRANSLATED_TYPES.includes(f.type)
-        ? [[f.key, f.default], [langKey(f.key, "nl"), NL_DEFAULTS[f.key] ?? f.default]]
+        ? [
+            [f.key, f.default],
+            ...LANGS.filter((l) => l !== "en").map((l) => [langKey(f.key, l), LANG_DEFAULTS[l]?.[f.key] ?? f.default]),
+          ]
         : [[f.key, f.default]]
     )
   )
